@@ -43,11 +43,27 @@ router.get('/:id', async (req, res, next) => {
 
 router.put('/:id', async (req, res, next) => {
 	try {
-		let { amt } = req.body;
-		let result = await db.query(
-			`UPDATE invoices SET amt=$1 WHERE id=$2 RETURNING id, comp_code, amt, paid, add_date, paid_date`,
-			[amt, req.params.id]
-		);
+		let { amt, paid } = req.body;
+		let result = await db.query(`SELECT * FROM invoices WHERE id=$1`, [req.params.id]);
+		let invoice = result.rows[0];
+
+		if (paid === true && invoice.paid === false) {
+			let paid_date = new Date().toLocaleDateString();
+			result = await db.query(
+				`UPDATE invoices SET amt=$1, paid_date=$2, paid=$3 WHERE id=$4 RETURNING id, comp_code, amt, paid, add_date, paid_date`,
+				[amt, paid_date, true, req.params.id]
+			);
+		} else if (paid === false && invoice.paid === true) {
+			result = await db.query(
+				`UPDATE invoices SET amt=$1, paid_date=$2, paid=$3 WHERE id=$4 RETURNING id, comp_code, amt, paid, add_date, paid_date`,
+				[amt, null, false, req.params.id]
+			);
+		} else {
+			result = await db.query(
+				`UPDATE invoices SET amt=$1 WHERE id=$2 RETURNING id, comp_code, amt, paid, add_date, paid_date`,
+				[amt, req.params.id]
+			);
+		}
 
 		if (result.rowCount === 0) {
 			throw new ExpressError('Invoice not found', 404);

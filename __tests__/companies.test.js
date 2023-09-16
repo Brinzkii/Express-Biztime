@@ -41,14 +41,13 @@ describe('GET /companies', () => {
 describe('POST /companies', () => {
 	test('Adds a new company', async () => {
 		const response = await request(app).post('/companies').send({
-			code: 'appl',
 			name: 'Apple',
 			description: 'Maker of iPhone and OSX',
 		});
 
 		expect(response.statusCode).toEqual(201);
 		expect(response.body).toEqual({
-			company: { code: 'appl', name: 'Apple', description: 'Maker of iPhone and OSX' },
+			company: { code: 'apple', name: 'Apple', description: 'Maker of iPhone and OSX' },
 		});
 	});
 });

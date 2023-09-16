@@ -78,14 +78,18 @@ router.get('/companies/:code', async (req, res, next) => {
 		let company = await db.query(`SELECT * FROM companies WHERE code=$1`, [req.params.code]);
 
 		if (company.rowCount === 0) {
-			throw new ExpressError('Company not found or has no invoices', 404);
+			throw new ExpressError('Company not found', 404);
 		}
 
 		let { code, name, description } = company.rows[0];
 
 		let result = await db.query(`SELECT * FROM invoices WHERE comp_code=$1`, [req.params.code]);
 
-		return res.json({ company: code, name, description, invoices: result.rows });
+		if (result.rowCount === 0) {
+			throw new ExpressError('Company has no outstanding invoices', 404);
+		}
+
+		return res.json({ company: { code, name, description, invoices: result.rows } });
 	} catch (err) {
 		return next(err);
 	}

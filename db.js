@@ -5,9 +5,9 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 if (process.env.NODE_ENV === 'test') {
-	process.env.PGDATABASE = 'biztime_test';
+	process.env.DATABASE = 'biztime_test';
 } else {
-	process.env.PGDATABASE = 'biztime';
+	process.env.DATABASE = 'biztime';
 }
 
 let db = new Client({
